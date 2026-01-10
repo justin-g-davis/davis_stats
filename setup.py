@@ -18,5 +18,11 @@ setup(
     python_requires='>=3.7',
     author='Justin G. Davis',
     author_email='',
-    description='davis_stats is a teaching-focused repository for applied statistics, data science, and business analytics. It contains functions and datasets to help W&L students develop practical skills in data analysis, statistical modeling, and real-world decision making.',
+    description='''
+        davis_stats is a teaching-focused repository 
+        for applied statistics, data science, and 
+        business analytics. It contains functions 
+        and datasets to help W&L students develop 
+        practical skills in data analysis, statistical 
+        modeling, and real-world decision making.''',
     keywords='statistics, data science, business analytics')
