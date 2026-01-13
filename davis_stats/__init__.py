@@ -1,9 +1,12 @@
 import pandas as pd
 from pathlib import Path
-from .data_visualization.trim import trim
-from .data_visualization.boxplot import boxplot
-from .data_visualization.histogram import histogram
-from .data_visualization.scatter import scatter
+from .visualization.trim import trim
+from .visualization.boxplot import boxplot
+from .visualization.histogram import histogram
+from .visualization.scatter import scatter
 from .data import (
-    )
+    ceo_comp)
 from .stats.reg import reg
+
+__all__ = [
+    'ceo_comp']
