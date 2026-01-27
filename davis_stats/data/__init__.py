@@ -10,6 +10,7 @@ class DataFrames:
     _olympic_medals = None
     _restaurants = None
     _world_cup_goals = None
+    _just_games = None
 
     @property
     def ceo_comp(self):
@@ -41,6 +42,11 @@ class DataFrames:
             self._world_cup_goals = pd.read_excel(DATA_DIR / 'world_cup_goals.xlsx')
         return self._world_cup_goals
 
+    @property
+    def just_games(self):
+        if self._just_games is None:
+            self._just_games = pd.read_excel(DATA_DIR / 'just_games.xlsx')
+        return self._just_games
 
 _data = DataFrames()
 
@@ -59,3 +65,6 @@ def restaurants():
 
 def world_cup_goals():
     return _data.world_cup_goals
+
+def just_games():
+    return _data.just_games
