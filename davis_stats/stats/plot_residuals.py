@@ -26,11 +26,3 @@ def plot_residuals(df, y, x, dummies=None, logistic=False, dpi=150, figsize=(6, 
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.show()
-    
-    print("\n" + "="*70)
-    print("LINEARITY CHECK")
-    print("="*70)
-    print("✓ GOOD: Points randomly scattered around zero line")
-    print("✗ BAD: Curved patterns or systematic deviations")
-    print("\nREMEDY: Change to correct model form (e.g., add polynomial terms)")
-    print("="*70)
