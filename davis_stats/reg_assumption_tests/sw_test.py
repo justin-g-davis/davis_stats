@@ -1,5 +1,5 @@
 from scipy import stats
-from .reg import reg
+from ..reg_modeling.reg import reg
 
 def sw_test(df, y, x, dummies=None, logistic=False):
     """
