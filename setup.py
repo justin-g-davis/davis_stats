@@ -5,7 +5,7 @@ setup(
     version='1.3',
     packages=find_packages(),
     package_data={
-        'davis_stats': ['data/*.xlsx']},
+        'davis_stats': ['datasets/*.xlsx']},
     install_requires=[
         'pandas>=1.0.0',
         'openpyxl>=3.0.0',
