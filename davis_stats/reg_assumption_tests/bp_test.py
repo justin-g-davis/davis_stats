@@ -1,5 +1,5 @@
 from statsmodels.stats.diagnostic import het_breuschpagan
-from reg_modeling.reg import reg
+from ..reg_modeling.reg import reg
 
 def bp_test(df, y, x, dummies=None, logistic=False):
     """
