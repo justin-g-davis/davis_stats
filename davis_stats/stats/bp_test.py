@@ -18,6 +18,6 @@ def bp_test(df, y, x, dummies=None, logistic=False):
         return None
     
     lm_stat, lm_pvalue, f_stat, f_pvalue = het_breuschpagan(results.resid, results.model.exog)
-    print("If p-value ≤ 0.5: Reject H0, assume heteroscedasticity. Further remedies needed.\n")
-    print("If p-value > 0.5: Fail to reject H0, assume homoscedasticity.\n\n")
+    print("If p-value ≤ 0.5: Reject H0, assume heteroscedasticity. Further remedies needed.")
+    print("If p-value > 0.5: Fail to reject H0, assume homoscedasticity.\n")
     print(f"p-value: {lm_pvalue:.4f}")
