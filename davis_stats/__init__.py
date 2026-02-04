@@ -9,3 +9,4 @@ from .data import (
 from .stats.reg import reg
 from .stats.plot_residuals import plot_residuals
 from .stats.bp_test import bp_test
+from .stats.sw_test import sw_test
