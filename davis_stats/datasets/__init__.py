@@ -55,7 +55,7 @@ class DataFrames:
             self._nba = pd.read_excel(DATA_DIR / 'nba.xlsx')
         return self._nba
 
-_data = DataFrames()
+_datasets = DataFrames()
 
 
 def ceo_comp():
