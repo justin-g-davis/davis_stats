@@ -7,3 +7,4 @@ from .data import (
     restaurants, world_cup_goals, just_games, 
     nba)
 from .stats.reg import reg
+from .stats.plot_residuals import plot_residuals
