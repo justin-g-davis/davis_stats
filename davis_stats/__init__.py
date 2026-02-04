@@ -8,6 +8,7 @@ from .reg_modeling.reg import reg
 
 from .reg_assumption_tests.bp_test import bp_test
 from .reg_assumption_tests.sw_test import sw_test
+from .reg_assumption_tests.vif_test import vif_test
 
 from .datasets import (
     ceo_comp, netflix_content, olympic_medals, 
