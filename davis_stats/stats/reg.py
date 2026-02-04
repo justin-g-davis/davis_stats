@@ -1,7 +1,6 @@
 import pandas as pd
 import statsmodels.api as sm
 
-
 def reg(df, y, x, dummies=None, logistic=False, robust=False, silent=False):
     """
     Run OLS or logistic regression.
