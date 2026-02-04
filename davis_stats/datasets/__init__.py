@@ -59,22 +59,22 @@ _data = DataFrames()
 
 
 def ceo_comp():
-    return _data.ceo_comp
+    return _datasets.ceo_comp
 
 def netflix_content():
-    return _data.netflix_content
+    return _datasets.netflix_content
 
 def olympic_medals():
-    return _data.olympic_medals
+    return _datasets.olympic_medals
 
 def restaurants():
-    return _data.restaurants
+    return _datasets.restaurants
 
 def world_cup_goals():
-    return _data.world_cup_goals
+    return _datasets.world_cup_goals
 
 def just_games():
-    return _data.just_games
+    return _datasets.just_games
 
 def nba():
-    return _data.nba
+    return _datasets.nba
