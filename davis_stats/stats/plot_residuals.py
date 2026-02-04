@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from .reg import reg
 
-def plot_residuals(df, y, x, dummies=None, logistic=False):
+def plot_residuals(df, y, x, dummies=None, logistic=False, dpi=150, figsize=(6, 4)):
     """
     Plot residuals vs fitted values to check linearity.
     
@@ -17,7 +17,7 @@ def plot_residuals(df, y, x, dummies=None, logistic=False):
     residuals = results.resid
     fitted = results.fittedvalues
     
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=figsize, dpi=dpi)
     plt.scatter(fitted, residuals, alpha=0.5, edgecolors='k', linewidth=0.5)
     plt.axhline(y=0, color='r', linestyle='--', linewidth=2)
     plt.xlabel('Fitted Values', fontsize=12)
