@@ -53,9 +53,6 @@ def scatter(df, y, x, fit_line=False, dpi=150, figsize=(6, 4)):
         x_var = x[0]
         z_var = x[1]
         
-        if len(x) > 2:
-            print(f"Note: More than 2 x variables provided. Using first 2: {x_var}, {z_var}")
-        
         # Create 3D figure
         fig = plt.figure(figsize=figsize, dpi=dpi)
         ax = fig.add_subplot(111, projection='3d')
