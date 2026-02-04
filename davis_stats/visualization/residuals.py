@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from reg_modeling.reg import reg
+from .reg_modeling.reg import reg
 
 def plot_residuals(df, y, x, dummies=None, logistic=False, dpi=150, figsize=(6, 4)):
     """
