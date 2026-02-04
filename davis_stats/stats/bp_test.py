@@ -5,7 +5,7 @@ def bp_test(df, y, x, dummies=None, logistic=False):
     """
     Breusch-Pagan test for constant error variance (homoscedasticity).
     """
-    print("Running Breusch-Pagan test for homoscedasticity...\n\n")
+    print("Breusch-Pagan test for homoscedasticity:\n\n")
     
     results = reg(df, y, x, dummies=dummies, logistic=logistic, silent=True)
     
