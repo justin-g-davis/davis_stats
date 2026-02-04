@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from statsmodels.stats.outliers_influence import variance_inflation_factor
-from ..reg_modeling import reg
+from ..reg_modeling.reg import reg
 
 def vif_test(df, y, x, dummies=None, logistic=False):
     """
