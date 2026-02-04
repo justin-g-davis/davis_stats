@@ -1,5 +1,9 @@
-def reg(df, y, x, dummies=None, logistic=False, robust=False):
-    '''
+import pandas as pd
+import statsmodels.api as sm
+
+
+def reg(df, y, x, dummies=None, logistic=False, robust=False, silent=False):
+    """
     Run linear (OLS) or logistic regression.
     
     Parameters
@@ -16,11 +20,13 @@ def reg(df, y, x, dummies=None, logistic=False, robust=False):
         If True, run logistic regression; otherwise run OLS
     robust : bool, default False
         If True, use White's heteroscedasticity-robust standard errors (OLS only)
+    silent : bool, default False
+        If True, suppress output (useful for diagnostic functions)
     
     Returns
     -------
     statsmodels results object or None if fitting fails
-    '''
+    """
     
     # Convert x to list if string, make copy to avoid modifying original
     if isinstance(x, str):
@@ -59,7 +65,8 @@ def reg(df, y, x, dummies=None, logistic=False, robust=False):
     df_reg = df_reg.dropna(subset=[y] + x)
     
     if len(df_reg) == 0:
-        print("Error: No observations remaining after dropping missing values")
+        if not silent:
+            print("Error: No observations remaining after dropping missing values")
         return None
     
     # Prepare X and y
@@ -69,7 +76,7 @@ def reg(df, y, x, dummies=None, logistic=False, robust=False):
     # Fit model
     try:
         if logistic:
-            if robust:
+            if robust and not silent:
                 print("Note: Robust standard errors not applicable for logistic regression")
             model = sm.Logit(y_data, X)
             results = model.fit(method='bfgs', maxiter=100, disp=0)
@@ -81,16 +88,19 @@ def reg(df, y, x, dummies=None, logistic=False, robust=False):
             else:
                 results = model.fit()
         
-        print(results.summary())
+        if not silent:
+            print(results.summary())
         return results
         
     except Exception as e:
-        print(f"Error fitting model: {e}")
+        if not silent:
+            print(f"Error fitting model: {e}")
         
         # For logistic with dummies, try again with larger categories only
         if logistic and dummies:
             min_obs = 30
-            print(f"\nRetrying with categories having at least {min_obs} observations...")
+            if not silent:
+                print(f"\nRetrying with categories having at least {min_obs} observations...")
             
             for dummy_var in dummies:
                 value_counts = df_reg[dummy_var].value_counts()
@@ -98,7 +108,8 @@ def reg(df, y, x, dummies=None, logistic=False, robust=False):
                 df_reg = df_reg[df_reg[dummy_var].isin(valid_categories)]
             
             if len(df_reg) == 0:
-                print("Error: No observations remaining after filtering")
+                if not silent:
+                    print("Error: No observations remaining after filtering")
                 return None
             
             try:
@@ -107,10 +118,12 @@ def reg(df, y, x, dummies=None, logistic=False, robust=False):
                 
                 model = sm.Logit(y_data, X)
                 results = model.fit(method='bfgs', maxiter=100, disp=0)
-                print("\nResults with reduced sample:")
-                print(results.summary())
+                if not silent:
+                    print("\nResults with reduced sample:")
+                    print(results.summary())
                 return results
             except Exception as e2:
-                print(f"Error fitting reduced model: {e2}")
+                if not silent:
+                    print(f"Error fitting reduced model: {e2}")
         
         return None
