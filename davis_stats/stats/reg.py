@@ -1,5 +1,5 @@
-def reg(df, y, x, dummies=None, logistic=False):
-    """
+def reg(df, y, x, dummies=None, logistic=False, robust=False):
+    '''
     Run linear (OLS) or logistic regression.
     
     Parameters
@@ -14,13 +14,13 @@ def reg(df, y, x, dummies=None, logistic=False):
         Categorical variable(s) to convert to dummy variables
     logistic : bool, default False
         If True, run logistic regression; otherwise run OLS
+    robust : bool, default False
+        If True, use White's heteroscedasticity-robust standard errors (OLS only)
     
     Returns
     -------
     statsmodels results object or None if fitting fails
-    """
-    import statsmodels.api as sm
-    import pandas as pd
+    '''
     
     # Convert x to list if string, make copy to avoid modifying original
     if isinstance(x, str):
@@ -69,11 +69,17 @@ def reg(df, y, x, dummies=None, logistic=False):
     # Fit model
     try:
         if logistic:
+            if robust:
+                print("Note: Robust standard errors not applicable for logistic regression")
             model = sm.Logit(y_data, X)
             results = model.fit(method='bfgs', maxiter=100, disp=0)
         else:
             model = sm.OLS(y_data, X)
-            results = model.fit()
+            if robust:
+                # HC1 is White's standard errors (small sample correction)
+                results = model.fit(cov_type='HC1')
+            else:
+                results = model.fit()
         
         print(results.summary())
         return results
