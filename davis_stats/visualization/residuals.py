@@ -1,12 +1,9 @@
 import matplotlib.pyplot as plt
 from ..reg_modeling.reg import reg
 
-def plot_residuals(df, y, x, dummies=None, logistic=False, dpi=150, figsize=(6, 4)):
+def residuals(df, y, x, dummies=None, logistic=False, dpi=150, figsize=(6, 4)):
     """
     Plot residuals vs fitted values to check linearity.
-    
-    Parameters: df, y, x, dummies, logistic
-    Returns: None (displays plot)
     """
     results = reg(df, y, x, dummies=dummies, logistic=logistic, silent=True)
     
