@@ -20,7 +20,7 @@ def dw_test(df, y, x, dummies=None, logistic=False):
     dw_stat = durbin_watson(results.resid)
     
     print("DW ≈ 2: No autocorrelation")
-    print("DW < 1.5: Positive autocorrelation. Further remedies needed.")
-    print("DW > 2.5: Negative autocorrelation. Further remedies needed.")
-    print("DW 1.5-2.5: Generally acceptable.\n")
+    print("DW 1.5-2.5: Generally acceptable.")
+    print("DW < 1.5: Positive autocorrelation. Remedies needed.")
+    print("DW > 2.5: Negative autocorrelation. Remedies needed.\n")
     print(f"Durbin-Watson statistic: {dw_stat:.4f}")
