@@ -40,7 +40,11 @@ def vif_test(df, y, x, dummies=None, logistic=False):
         print(f"Error calculating VIF: {e}\n")
         return None
     
-    print("VIF < 5: No multicollinearity")
-    print("VIF 5-10: Moderate multicollinearity")
-    print("VIF > 10: Severe multicollinearity. Further remedies needed.\n")
+    print("VIF < 5: Little to no multicollinearity.")
+    print("VIF 5-10: Moderate multicollinearity. Remedies may be needed.")
+    print("VIF > 10: Severe multicollinearity. Remedies needed.\n")
     print(vif_data.to_string(index=False))
+    
+    # Print mean VIF
+    mean_vif = vif_data["VIF"].mean()
+    print(f"\nMean VIF: {mean_vif:.2f}")
