@@ -53,7 +53,7 @@ def reg(df, y, x, dummies=None, logistic=False, robust=False, silent=False):
             if robust and not silent:
                 print("Note: Robust standard errors not applicable for logistic regression")
             model = sm.Logit(y_data, X)
-            results = model.fit(method='bfgs', maxiter=100, disp=0)
+            results = model.fit(method='lbfgs', maxiter=5000, disp=0)
         else:
             model = sm.OLS(y_data, X)
             if robust:
@@ -89,7 +89,7 @@ def reg(df, y, x, dummies=None, logistic=False, robust=False, silent=False):
                 y_data = df_reg[y].astype(float)
                 
                 model = sm.Logit(y_data, X)
-                results = model.fit(method='bfgs', maxiter=100, disp=0)
+                results = model.fit(method='lbfgs', maxiter=5000, disp=0)
                 if not silent:
                     print("\nResults with reduced sample:")
                     print(results.summary())
