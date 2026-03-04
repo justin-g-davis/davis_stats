@@ -12,6 +12,7 @@ class DataFrames:
     _world_cup_goals = None
     _just_games = None
     _nba = None
+    _fired_ceo = None
 
     @property
     def ceo_comp(self):
@@ -55,6 +56,12 @@ class DataFrames:
             self._nba = pd.read_excel(DATA_DIR / 'nba.xlsx')
         return self._nba
 
+    @property
+    def fired_ceo(self):
+        if self._fired_ceo is None:
+            self._fired_ceo = pd.read_excel(DATA_DIR / 'fired_ceo.xlsx')
+        return self._fired_ceo
+
 _datasets = DataFrames()
 
 
@@ -78,3 +85,6 @@ def just_games():
 
 def nba():
     return _datasets.nba
+
+def fired_ceo():
+    return _datasets.fired_ceo
