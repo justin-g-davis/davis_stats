@@ -15,4 +15,4 @@ from .reg_assumption_tests.vif_test import vif_test
 from .datasets import (
     ceo_comp, netflix_content, olympic_medals, 
     restaurants, world_cup_goals, just_games, 
-    nba, ceo_firing)
+    nba, fired_ceo)
