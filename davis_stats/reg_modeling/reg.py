@@ -50,10 +50,11 @@ def reg(df, y, x, dummies=None, logistic=False, robust=False, silent=False):
     
     try:
         if logistic:
-            if robust and not silent:
-                print("Note: Robust standard errors not applicable for logistic regression")
             model = sm.Logit(y_data, X)
-            results = model.fit(method='lbfgs', maxiter=5000, disp=0)
+            if robust:
+                results = model.fit(method='lbfgs', maxiter=5000, disp=0, cov_type='HC1')
+            else:
+                results = model.fit(method='lbfgs', maxiter=5000, disp=0)
         else:
             model = sm.OLS(y_data, X)
             if robust:
@@ -68,34 +69,4 @@ def reg(df, y, x, dummies=None, logistic=False, robust=False, silent=False):
     except Exception as e:
         if not silent:
             print(f"Error fitting model: {e}")
-        
-        if logistic and dummies:
-            min_obs = 30
-            if not silent:
-                print(f"\nRetrying with categories having at least {min_obs} observations...")
-            
-            for dummy_var in dummies:
-                value_counts = df_reg[dummy_var].value_counts()
-                valid_categories = value_counts[value_counts >= min_obs].index
-                df_reg = df_reg[df_reg[dummy_var].isin(valid_categories)]
-            
-            if len(df_reg) == 0:
-                if not silent:
-                    print("Error: No observations remaining after filtering")
-                return None
-            
-            try:
-                X = sm.add_constant(df_reg[x].astype(float))
-                y_data = df_reg[y].astype(float)
-                
-                model = sm.Logit(y_data, X)
-                results = model.fit(method='lbfgs', maxiter=5000, disp=0)
-                if not silent:
-                    print("\nResults with reduced sample:")
-                    print(results.summary())
-                return results
-            except Exception as e2:
-                if not silent:
-                    print(f"Error fitting reduced model: {e2}")
-        
         return None
