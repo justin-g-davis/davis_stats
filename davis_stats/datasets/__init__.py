@@ -13,6 +13,7 @@ class DataFrames:
     _just_games = None
     _nba = None
     _fired_ceo = None
+    _restate = None
 
     @property
     def ceo_comp(self):
@@ -62,6 +63,12 @@ class DataFrames:
             self._fired_ceo = pd.read_excel(DATA_DIR / 'fired_ceo.xlsx')
         return self._fired_ceo
 
+    @property
+    def restate(self):
+        if self._restate is None:
+            self._restate = pd.read_excel(DATA_DIR / 'restate.xlsx')
+        return self._restate
+
 _datasets = DataFrames()
 
 
@@ -88,3 +95,6 @@ def nba():
 
 def fired_ceo():
     return _datasets.fired_ceo
+
+def restate():
+    return _datasets.restate
