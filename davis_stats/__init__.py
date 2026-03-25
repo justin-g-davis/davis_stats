@@ -11,8 +11,9 @@ from .reg_tests.bp_test import bp_test
 from .reg_tests.sw_test import sw_test
 from .reg_tests.dw_test import dw_test
 from .reg_tests.vif_test import vif_test
+from .reg_tests.vif_test import hausman_test
 
 from .datasets import (
     ceo_comp, netflix_content, olympic_medals, 
     restaurants, world_cup_goals, just_games, 
-    nba, fired_ceo, restate)
+    nba, fired_ceo, restate, new_ceo)
