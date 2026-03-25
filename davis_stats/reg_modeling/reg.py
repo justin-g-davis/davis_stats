@@ -1,18 +1,7 @@
 import pandas as pd
 import statsmodels.api as sm
 
-def reg(
-    df,
-    y,
-    x,
-    dummies=None,
-    logistic=False,      # keeps old behavior
-    panel=None,          # None | "fe" | "re"
-    entity=None,         # required when panel in {"fe","re"}
-    time=None,           # optional panel sort key
-    robust=False,
-    silent=False
-):
+def reg(df, y, x, dummies=None, logistic=False, panel=None, entity=None, time=None, robust=False, silent=False):
     """
     Run pooled OLS/logit, or panel FE/RE.
 
