@@ -28,31 +28,9 @@ def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
         x = list(x)
 
     # Fit FE and RE using the same reg interface
-    fe_res = reg(
-        df=df,
-        y=y,
-        x=x,
-        dummies=dummies,
-        logistic=False,
-        panel="fe",
-        entity=entity,
-        time=time,
-        robust=robust,
-        silent=True
-    )
+    fe_res = reg(df=df, y=y, x=x, dummies=dummies, logistic=False, panel="fe", entity=entity, time=time, robust=robust, silent=True)
 
-    re_res = reg(
-        df=df,
-        y=y,
-        x=x,
-        dummies=dummies,
-        logistic=False,
-        panel="re",
-        entity=entity,
-        time=time,
-        robust=robust,
-        silent=True
-    )
+    re_res = reg(df=df, y=y, x=x, dummies=dummies, logistic=False, panel="re", entity=entity, time=time, robust=robust, silent=True)
 
     if fe_res is None or re_res is None:
         if not silent:
@@ -118,6 +96,5 @@ def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
         return result
 
     except Exception as e:
-        if not silent:
-            print(f"Error computing Hausman test: {e}")
+        print(f"Error computing Hausman test: {e}")
         return None
