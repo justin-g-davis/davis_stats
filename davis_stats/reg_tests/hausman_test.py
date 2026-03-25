@@ -121,8 +121,6 @@ def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
         print(f"p-value: {p_value:.4f}")
         print(f"Decision: {decision}")
 
-        return result
-
     except Exception as e:
         print(f"Error computing Hausman test: {e}")
         return None
