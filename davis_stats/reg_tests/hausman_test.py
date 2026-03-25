@@ -6,15 +6,6 @@ import statsmodels.api as sm
 def hausman_test(df, y, x, entity, time, dummies=None, silent=False):
     """
     Hausman test: Fixed Effects (FE) vs Random Effects (RE).
-
-    H0: RE is consistent and efficient (prefer RE)
-    H1: RE is inconsistent (prefer FE)
-
-    Parameters:
-        df, y, x, entity, time, dummies, silent
-    Returns:
-        dict with test statistic, dof, p-value, and recommendation
-        (or None if model/test cannot be computed)
     """
     # Normalize x input
     if isinstance(x, str):
