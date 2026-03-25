@@ -1,18 +1,9 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
-from .reg import reg  # adjust import path if needed
+from ..reg_modeling.reg import reg
 
-def hausman_test(
-    df,
-    y,
-    x,
-    dummies=None,
-    entity=None,
-    time=None,
-    robust=False,
-    silent=False
-):
+def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
     """
     Hausman test for panel models: FE vs RE.
 
@@ -114,16 +105,15 @@ def hausman_test(
             "coefficients_tested": common
         }
 
-        if not silent:
-            print("Hausman test (FE vs RE):\n")
-            print("H0: RE is consistent and efficient (prefer RE).")
-            print("H1: RE is inconsistent (prefer FE).\n")
-            print("If p-value ≤ 0.05: Reject H0, prefer FE.")
-            print("If p-value > 0.05: Fail to reject H0, prefer RE.\n")
-            print(f"Chi-square statistic: {h_stat:.4f}")
-            print(f"Degrees of freedom: {dof}")
-            print(f"p-value: {p_value:.4f}")
-            print(f"Decision: {decision}")
+        print("Hausman test (FE vs RE):\n")
+        print("H0: RE is consistent and efficient (prefer RE).")
+        print("H1: RE is inconsistent (prefer FE).\n")
+        print("If p-value ≤ 0.05: Reject H0, prefer FE.")
+        print("If p-value > 0.05: Fail to reject H0, prefer RE.\n")
+        print(f"Chi-square statistic: {h_stat:.4f}")
+        print(f"Degrees of freedom: {dof}")
+        print(f"p-value: {p_value:.4f}")
+        print(f"Decision: {decision}")
 
         return result
 
