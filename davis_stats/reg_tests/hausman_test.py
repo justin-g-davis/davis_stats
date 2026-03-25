@@ -17,8 +17,7 @@ def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
     """
 
     if entity is None:
-        if not silent:
-            print("Error: entity is required for Hausman test.")
+        print("Error: entity is required for Hausman test.")
         return None
 
     # Normalize x for local checks
@@ -33,8 +32,7 @@ def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
     re_res = reg(df=df, y=y, x=x, dummies=dummies, logistic=False, panel="re", entity=entity, time=time, robust=robust, silent=True)
 
     if fe_res is None or re_res is None:
-        if not silent:
-            print("Error: Could not fit FE and/or RE model for Hausman test.")
+        print("Error: Could not fit FE and/or RE model for Hausman test.")
         return None
 
     try:
@@ -45,8 +43,7 @@ def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
         common = [name for name in fe_names if name in re_names and name != "const"]
 
         if len(common) == 0:
-            if not silent:
-                print("Error: No common slope coefficients between FE and RE.")
+            print("Error: No common slope coefficients between FE and RE.")
             return None
 
         b_fe = fe_res.params.loc[common].values
@@ -74,14 +71,7 @@ def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
             else "Fail to reject H0 (prefer RE): RE appears consistent."
         )
 
-        result = {
-            "test": "Hausman",
-            "statistic": h_stat,
-            "df": dof,
-            "p_value": p_value,
-            "decision": decision,
-            "coefficients_tested": common
-        }
+        result = {"test": "Hausman", "statistic": h_stat, "df": dof, "p_value": p_value, "decision": decision, "coefficients_tested": common}
 
         print("Hausman test (FE vs RE):\n")
         print("H0: RE is consistent and efficient (prefer RE).")
