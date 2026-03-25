@@ -1,23 +1,20 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
-from ..reg_modeling.reg import reg
-
-import numpy as np
-from scipy import stats
-import warnings
-from statsmodels.tools.sm_exceptions import ConvergenceWarning
-from ..reg_modeling.reg import reg
+from linearmodels.panel import PanelOLS, RandomEffects
 
 def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
     """
     Hausman test for panel models: FE vs RE.
+
+    H0: RE is consistent and efficient (prefer RE)
+    H1: RE is inconsistent (prefer FE)
+
+    Returns dict with fields: test, statistic, df, p_value, decision, coefficients_tested
     """
 
-    robust = False  # force off for Hausman consistency
-
-    if entity is None:
-        print("Error: entity is required for Hausman test.")
+    if entity is None or time is None:
+        print("Error: entity and time are required for Hausman test.")
         return None
 
     if isinstance(x, str):
@@ -25,25 +22,44 @@ def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
     else:
         x = list(x)
 
-    fe_res = reg(df=df, y=y, x=x, dummies=dummies, logistic=False, panel="fe", entity=entity, time=time, robust=False, silent=True)
+    df_reg = df.copy()
 
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always", ConvergenceWarning)
-        re_res = reg(df=df, y=y, x=x, dummies=dummies, logistic=False, panel="re", entity=entity, time=time, robust=False, silent=True)
-        re_warnings = [str(msg.message) for msg in w if issubclass(msg.category, ConvergenceWarning)]
+    # numeric conversion for y/x
+    for col in [y] + x:
+        df_reg[col] = pd.to_numeric(df_reg[col], errors="coerce")
 
-    if fe_res is None or re_res is None:
-        print("Error: Could not fit FE and/or RE model for Hausman test.")
+    # optional dummies (match your reg style)
+    if dummies:
+        if isinstance(dummies, str):
+            dummies = [dummies]
+        for dummy_var in dummies:
+            dummy_cols = pd.get_dummies(df_reg[dummy_var], prefix=dummy_var, drop_first=True, dtype=float)
+            df_reg = pd.concat([df_reg, dummy_cols], axis=1)
+            x.extend(dummy_cols.columns.tolist())
+
+    df_reg = df_reg.dropna(subset=[y, entity, time] + x)
+    if len(df_reg) == 0:
+        print("Error: No observations remaining after dropping missing values")
         return None
 
-    if hasattr(re_res, "converged") and not re_res.converged:
-        print("Error: RE model did not converge. Hausman test is not valid.")
-        return None
+    # panel index for linearmodels
+    df_reg = df_reg.sort_values([entity, time]).set_index([entity, time])
+
+    y_data = df_reg[y].astype(float)
+    X_data = df_reg[x].astype(float)
 
     try:
+        # FE (entity effects)
+        fe_model = PanelOLS(y_data, X_data, entity_effects=True, drop_absorbed=True)
+        fe_res = fe_model.fit(cov_type="unadjusted")
+
+        # RE
+        re_model = RandomEffects(y_data, X_data)
+        re_res = re_model.fit(cov_type="unadjusted")
+
         fe_names = list(fe_res.params.index)
         re_names = list(re_res.params.index)
-        common = [n for n in fe_names if n in re_names and n != "const"]
+        common = [name for name in fe_names if name in re_names]
 
         if len(common) == 0:
             print("Error: No common slope coefficients between FE and RE.")
@@ -52,30 +68,39 @@ def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
         b_fe = fe_res.params.loc[common].to_numpy(dtype=float)
         b_re = re_res.params.loc[common].to_numpy(dtype=float)
 
-        V_fe = fe_res.cov_params().loc[common, common].to_numpy(dtype=float)
-        V_re = re_res.cov_params().loc[common, common].to_numpy(dtype=float)
+        V_fe = fe_res.cov.loc[common, common].to_numpy(dtype=float)
+        V_re = re_res.cov.loc[common, common].to_numpy(dtype=float)
 
         diff_b = b_fe - b_re
-        diff_V = 0.5 * ((V_fe - V_re) + (V_fe - V_re).T)
+        diff_V = V_fe - V_re
+        diff_V = 0.5 * (diff_V + diff_V.T)  # symmetrize
 
+        # Generalized (stable) Hausman with rank-aware dof and ridge fallback
         eigvals = np.linalg.eigvalsh(diff_V)
-        if np.min(eigvals) < -1e-8:
-            print("Error: Var(FE)-Var(RE) is not positive semidefinite. Hausman test invalid.")
-            return None
+        tol = 1e-8
+        rank = int(np.sum(eigvals > tol))
 
-        if (not np.isfinite(np.linalg.cond(diff_V))) or (np.linalg.cond(diff_V) > 1e12):
-            print("Error: Var(FE)-Var(RE) is near-singular/ill-conditioned. Hausman test invalid.")
-            return None
+        if rank == 0:
+            lam = 1e-8 * max(1.0, float(np.mean(np.diag(V_fe + V_re))))
+            diff_V = diff_V + lam * np.eye(diff_V.shape[0])
+            eigvals = np.linalg.eigvalsh(diff_V)
+            rank = int(np.sum(eigvals > tol))
 
-        h_stat = float(diff_b.T @ np.linalg.inv(diff_V) @ diff_b)
-        if h_stat < -1e-8:
-            print("Error: Negative Hausman statistic due to numerical instability. Test invalid.")
-            return None
+        if rank == 0:
+            h_stat = 0.0
+            dof = len(common)
+        else:
+            inv_diff_V = np.linalg.pinv(diff_V, rcond=1e-10)
+            h_stat = float(diff_b.T @ inv_diff_V @ diff_b)
+            h_stat = max(h_stat, 0.0)
+            dof = rank
 
-        h_stat = max(h_stat, 0.0)
-        dof = len(common)
         p_value = float(1 - stats.chi2.cdf(h_stat, dof))
-        decision = "Reject H0 (prefer FE): RE likely inconsistent." if p_value <= 0.05 else "Fail to reject H0 (prefer RE): RE appears consistent."
+        decision = (
+            "Reject H0 (prefer FE): RE likely inconsistent."
+            if p_value <= 0.05
+            else "Fail to reject H0 (prefer RE): RE appears consistent."
+        )
 
         result = {
             "test": "Hausman",
@@ -83,8 +108,7 @@ def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
             "df": dof,
             "p_value": p_value,
             "decision": decision,
-            "coefficients_tested": common,
-            "re_convergence_warnings": re_warnings,
+            "coefficients_tested": common
         }
 
         print("Hausman test (FE vs RE):\n")
@@ -96,8 +120,6 @@ def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
         print(f"Degrees of freedom: {dof}")
         print(f"p-value: {p_value:.4f}")
         print(f"Decision: {decision}")
-        if re_warnings:
-            print("\nNote: RE model emitted convergence warnings; interpret with caution.")
 
         return result
 
