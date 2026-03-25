@@ -27,9 +27,9 @@ def hausman_test(df, y, x, dummies=None, entity=None, time=None, robust=False):
         x = list(x)
 
     # Fit FE and RE using the same reg interface
-    fe_res = reg(df=df, y=y, x=x, dummies=dummies, logistic=False, panel="fe", entity=entity, time=time, robust=robust, silent=True)
+    fe_res = reg(df=df, y=y, x=x, dummies=dummies, logistic=False, panel="fe", entity=entity, time=time, robust=False, silent=True)
 
-    re_res = reg(df=df, y=y, x=x, dummies=dummies, logistic=False, panel="re", entity=entity, time=time, robust=robust, silent=True)
+    re_res = reg(df=df, y=y, x=x, dummies=dummies, logistic=False, panel="re", entity=entity, time=time, robust=False, silent=True)
 
     if fe_res is None or re_res is None:
         print("Error: Could not fit FE and/or RE model for Hausman test.")
