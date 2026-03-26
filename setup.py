@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='davis_stats',
-    version='1.92',
+    version='1.93',
     packages=find_packages(),
     package_data={
         'davis_stats': ['datasets/*.xlsx']},
@@ -14,7 +14,8 @@ setup(
         'scipy>=1.6.0',
         'seaborn>=0.12.0',
         'statsmodels>=0.14.0',
-        'ipympl>=0.8.0'],
+        'ipympl>=0.8.0',
+        'linearmodels>=7.0'],
     python_requires='>=3.7',
     author='Justin G. Davis',
     author_email='',
