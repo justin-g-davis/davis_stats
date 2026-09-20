@@ -16,4 +16,4 @@ from .reg_tests.hausman_test import hausman_test
 from .datasets import (
     ceo_comp, netflix_content, olympic_medals, 
     restaurants, world_cup_goals, just_games, 
-    nba, fired_ceo, restate, new_ceo)
+    nba, fired_ceo, restate, new_ceo, sp1500_2025)
