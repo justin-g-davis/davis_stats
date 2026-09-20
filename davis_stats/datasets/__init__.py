@@ -15,6 +15,7 @@ class DataFrames:
     _fired_ceo = None
     _restate = None
     _new_ceo = None
+    _sp1500_2025 = None
 
     @property
     def ceo_comp(self):
@@ -76,6 +77,12 @@ class DataFrames:
             self._new_ceo = pd.read_excel(DATA_DIR / 'new_ceo.xlsx')
         return self._new_ceo
 
+    @property
+    def sp1500_2025(self):
+        if self._sp1500_2025 is None:
+            self._sp1500_2025 = pd.read_excel(DATA_DIR / 'sp1500_2025.xlsx')
+        return self._sp1500_2025
+
 _datasets = DataFrames()
 
 
@@ -108,3 +115,6 @@ def restate():
 
 def new_ceo():
     return _datasets.new_ceo
+
+def sp1500_2025():
+    return _datasets.sp1500_2025
