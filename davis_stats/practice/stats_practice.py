@@ -3,7 +3,7 @@ def quartile_practice():
     print("Quartile practice (5 questions)")
     print("Odd n: exclude the median when finding Q1/Q3.\n")
     for question in range(1, 6):
-        n = random.randint(3, 10)
+        n = random.randint(4, 10)
         data = sorted(random.sample(range(1, 100), n))
         # Easy numbers: each value equals the previous, or differs by 1 or 2
         start = random.randint(1, 80)
