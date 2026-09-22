@@ -2,15 +2,15 @@ from setuptools import setup, find_packages
 
 setup(
     name='davis_stats',
-    version='2.1',
+    version='2.2',
     packages=find_packages(),
     package_data={
         'davis_stats': ['datasets/*.xlsx']},
     install_requires=[
-        'pandas>=1.0.0',
+        'pandas>=3.0.6',
         'openpyxl>=3.0.0',
         'numpy>=1.20.0',
-        'matplotlib>=3.0.0',
+        'matplotlib>=3.11.2',
         'scipy>=1.6.0',
         'seaborn>=0.12.0',
         'statsmodels>=0.14.0',
