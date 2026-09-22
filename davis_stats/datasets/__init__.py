@@ -16,6 +16,7 @@ class DataFrames:
     _restate = None
     _new_ceo = None
     _sp1500_2025 = None
+    _sp1500_panel = None
 
     @property
     def ceo_comp(self):
@@ -83,6 +84,12 @@ class DataFrames:
             self._sp1500_2025 = pd.read_excel(DATA_DIR / 'sp1500_2025.xlsx')
         return self._sp1500_2025
 
+    @property
+    def sp1500_panel(self):
+        if self._sp1500_panel is None:
+            self._sp1500_panel = pd.read_excel(DATA_DIR / 'sp1500_panel.xlsx')
+        return self._sp1500_panel
+
 _datasets = DataFrames()
 
 
@@ -118,3 +125,6 @@ def new_ceo():
 
 def sp1500_2025():
     return _datasets.sp1500_2025
+
+def sp1500_panel():
+    return _datasets.sp1500_panel
