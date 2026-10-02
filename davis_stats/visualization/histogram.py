@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.ticker import FuncFormatter, MaxNLocator
 from math import erf, sqrt
+from .trim import trim
 
 TRUE_1SD, TRUE_2SD, TRUE_3SD = [erf(k / sqrt(2)) * 100 for k in (1, 2, 3)]
 
