@@ -9,11 +9,10 @@ def boxplot(
     series,
     title=None,
     trim_outliers=100,
-    dpi=200,
+    details=True,
+    dpi=160,
     save_dpi=300,
     figsize=(7, 4.5),
-    show_mean=True,
-    show_stats=True,
     horizontal=False,
     save_path=None,
     facecolor="white",
@@ -83,11 +82,11 @@ def boxplot(
         FuncFormatter(lambda v, _: f"{v:,.2f}")
     )
 
-    q1, med, q3 = np.percentile(original, [25, 50, 75])
-    mean = float(np.mean(original))
-    iqr = q3 - q1
+    if details:
+        q1, med, q3 = np.percentile(original, [25, 50, 75])
+        mean = float(np.mean(original))
+        iqr = q3 - q1
 
-    if show_mean:
         if horizontal:
             ax.scatter(
                 [mean], [1], s=55, c="#1a1a1a", zorder=5,
@@ -100,7 +99,6 @@ def boxplot(
             )
         ax.legend(loc="upper right", frameon=True, framealpha=0.9, fontsize=10)
 
-    if show_stats:
         stats = (
             f"n = {len(original):,}\n"
             f"Mean:   {mean:>10,.2f}\n"
