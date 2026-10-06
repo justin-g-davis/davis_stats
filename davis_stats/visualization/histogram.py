@@ -31,7 +31,7 @@ def histogram(
     if original_data.size == 0:
         raise ValueError("No data to plot after dropping NaNs.")
 
-    plot_series = series
+    plot_series = series.dropna()
     if trim_outliers < 100:
         plot_series = trim(series, trim_outliers)
         title = f"{title} (outliers removed at {trim_outliers}% level)"
