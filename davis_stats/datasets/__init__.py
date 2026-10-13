@@ -17,6 +17,7 @@ class DataFrames:
     _new_ceo = None
     _sp1500_2025 = None
     _sp1500_panel = None
+    _student_athletes = None
 
     @property
     def ceo_comp(self):
@@ -90,6 +91,12 @@ class DataFrames:
             self._sp1500_panel = pd.read_excel(DATA_DIR / 'sp1500_panel.xlsx')
         return self._sp1500_panel
 
+    @property
+    def student_athletes(self):
+        if self._student_athletes is None:
+            self._student_athletes = pd.read_excel(DATA_DIR / 'student_athletes.xlsx')
+        return self._student_athletes
+
 _datasets = DataFrames()
 
 
@@ -128,3 +135,6 @@ def sp1500_2025():
 
 def sp1500_panel():
     return _datasets.sp1500_panel
+
+def student_athletes():
+    return _datasets.student_athletes
