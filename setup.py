@@ -15,7 +15,7 @@ setup(
         'statsmodels>=0.14.0',
         'ipympl>=0.8.0',
         'linearmodels>=7.0'],
-    python_requires='>=3.7',
+    python_requires='>=3.11',
     author='Justin G. Davis',
     author_email='',
     description='''
