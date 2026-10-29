@@ -10,6 +10,7 @@ def residuals(
     x,
     dummies=None,
     logistic=False,
+    decimals=1,
     dpi=200,
     save_dpi=300,
     figsize=(7, 4.5),
@@ -45,6 +46,7 @@ def residuals(
         0, color="#c0392b", linestyle="--", linewidth=1.8, zorder=4,
     )
 
+    fmt = FuncFormatter(lambda v, _: f"{v:,.{decimals}f}")
     ax.grid(True, linestyle="--", linewidth=0.8, alpha=0.45)
     ax.set_axisbelow(True)
     ax.spines["top"].set_visible(False)
@@ -53,8 +55,8 @@ def residuals(
     ax.spines["bottom"].set_linewidth(1.2)
     ax.tick_params(labelsize=10, length=5, width=1.1)
     ax.ticklabel_format(style="plain")
-    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:,.2f}"))
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:,.2f}"))
+    ax.xaxis.set_major_formatter(fmt)
+    ax.yaxis.set_major_formatter(fmt)
     ax.xaxis.set_major_locator(MaxNLocator(nbins=6))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=6))
 
