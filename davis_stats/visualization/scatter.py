@@ -10,6 +10,7 @@ def scatter(
     y,
     x,
     fit_line=False,
+    title=None,
     decimals=1,
     dpi=200,
     save_dpi=300,
@@ -30,12 +31,12 @@ def scatter(
 
     if len(x) == 1:
         ax = _scatter_2d(
-            df, y, x[0], fit_line=fit_line, decimals=decimals,
+            df, y, x[0], fit_line=fit_line, title=title, decimals=decimals,
             dpi=dpi, figsize=figsize, facecolor=facecolor,
         )
     else:
         ax = _scatter_3d(
-            df, y, x[0], x[1], fit_line=fit_line, decimals=decimals,
+            df, y, x[0], x[1], fit_line=fit_line, title=title, decimals=decimals,
             dpi=dpi, figsize=figsize, facecolor=facecolor,
         )
 
@@ -60,6 +61,15 @@ def _fit_kind(fit_line):
     raise ValueError("fit_line must be False, 'linear', or 'quadratic'")
 
 
+def _numeric_cols(df, *names):
+    """Return aligned 1D float arrays, even if the same column is used twice."""
+    series = [pd.to_numeric(df[name], errors="coerce") for name in names]
+    mask = series[0].notna()
+    for s in series[1:]:
+        mask &= s.notna()
+    return [s.loc[mask].to_numpy(dtype=float) for s in series]
+
+
 def _style_2d(ax, decimals):
     fmt = FuncFormatter(lambda v, _: f"{v:,.{decimals}f}")
     ax.grid(True, linestyle="--", linewidth=0.8, alpha=0.45)
@@ -76,14 +86,14 @@ def _style_2d(ax, decimals):
     ax.yaxis.set_major_locator(MaxNLocator(nbins=6))
 
 
-def _scatter_2d(df, y, x_var, fit_line, decimals, dpi, figsize, facecolor):
-    plot_df = df[[x_var, y]].dropna()
-    if plot_df.empty:
+def _scatter_2d(df, y, x_var, fit_line, title, decimals, dpi, figsize, facecolor):
+    xv, yv = _numeric_cols(df, x_var, y)
+    if xv.size == 0:
         raise ValueError("No data to plot after dropping NaNs.")
 
-    xv = plot_df[x_var].to_numpy(dtype=float)
-    yv = plot_df[y].to_numpy(dtype=float)
     corr = float(pd.Series(xv).corr(pd.Series(yv)))
+    if not title:
+        title = f"{y} and {x_var}\nCorrelation: {corr:.2f}"
 
     fig, ax = plt.subplots(figsize=figsize, dpi=dpi, facecolor=facecolor)
     fig.patch.set_facecolor(facecolor)
@@ -115,32 +125,32 @@ def _scatter_2d(df, y, x_var, fit_line, decimals, dpi, figsize, facecolor):
         )
 
     _style_2d(ax, decimals)
-    ax.set_title(
-        f"{y} and {x_var}\nCorrelation: {corr:.2f}",
-        fontsize=13, pad=10,
-    )
+    ax.set_title(title, fontsize=13, pad=10)
     ax.set_xlabel(x_var, fontsize=11)
     ax.set_ylabel(y, fontsize=11)
     return ax
 
 
-def _scatter_3d(df, y, x_var, z_var, fit_line, decimals, dpi, figsize, facecolor):
+def _scatter_3d(df, y, x_var, z_var, fit_line, title, decimals, dpi, figsize, facecolor):
     kind = _fit_kind(fit_line)
     if kind == "quadratic":
         raise ValueError("fit_line='quadratic' is only available for 2D scatter plots.")
 
-    plot_df = df[[x_var, z_var, y]].dropna()
-    if plot_df.empty:
+    xv, zv, yv = _numeric_cols(df, x_var, z_var, y)
+    if xv.size == 0:
         raise ValueError("No data to plot after dropping NaNs.")
+
+    if not title:
+        title = f"{y}, {x_var}, and {z_var}"
 
     fig = plt.figure(figsize=figsize, dpi=dpi, facecolor=facecolor)
     fig.patch.set_facecolor(facecolor)
     ax = fig.add_subplot(111, projection="3d", facecolor=facecolor)
 
     ax.scatter(
-        plot_df[x_var],
-        plot_df[z_var],
-        plot_df[y],
+        xv,
+        zv,
+        yv,
         s=32,
         c="#7eb6d9",
         alpha=0.78,
@@ -150,15 +160,12 @@ def _scatter_3d(df, y, x_var, z_var, fit_line, decimals, dpi, figsize, facecolor
     )
 
     if kind == "linear":
-        X_data = np.column_stack(
-            [plot_df[x_var], plot_df[z_var], np.ones(len(plot_df))]
-        )
-        y_data = plot_df[y].to_numpy(dtype=float)
-        coeffs, *_ = np.linalg.lstsq(X_data, y_data, rcond=None)
+        X_data = np.column_stack([xv, zv, np.ones(len(xv))])
+        coeffs, *_ = np.linalg.lstsq(X_data, yv, rcond=None)
         a, b, c = coeffs
 
-        x_surf = np.linspace(plot_df[x_var].min(), plot_df[x_var].max(), 12)
-        z_surf = np.linspace(plot_df[z_var].min(), plot_df[z_var].max(), 12)
+        x_surf = np.linspace(xv.min(), xv.max(), 12)
+        z_surf = np.linspace(zv.min(), zv.max(), 12)
         X_mesh, Z_mesh = np.meshgrid(x_surf, z_surf)
         Y_mesh = a * X_mesh + b * Z_mesh + c
         ax.plot_surface(
@@ -176,7 +183,7 @@ def _scatter_3d(df, y, x_var, z_var, fit_line, decimals, dpi, figsize, facecolor
     ax.yaxis.set_major_formatter(fmt)
     ax.zaxis.set_major_formatter(fmt)
 
-    ax.set_title(f"{y}, {x_var}, and {z_var}", fontsize=13, pad=10)
+    ax.set_title(title, fontsize=13, pad=10)
     ax.set_xlabel(x_var, fontsize=11, labelpad=8)
     ax.set_ylabel(z_var, fontsize=11, labelpad=8)
     ax.set_zlabel(y, fontsize=11, labelpad=8)
