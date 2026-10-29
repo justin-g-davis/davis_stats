@@ -12,6 +12,7 @@ def histogram(
     bins=30,
     trim_outliers=100,
     details=True,
+    decimals=1,
     dpi=200,
     save_dpi=300,
     figsize=(7, 4.5),
@@ -55,7 +56,7 @@ def histogram(
     ax.set_xlabel("")
     ax.tick_params(labelsize=10, length=5, width=1.1)
     ax.ticklabel_format(style="plain", axis="x")
-    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:,.2f}"))
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:,.{decimals}f}"))
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:,.0f}"))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=6))
 
