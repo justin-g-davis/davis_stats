@@ -10,6 +10,7 @@ def boxplot(
     title=None,
     trim_outliers=100,
     details=True,
+    decimals=1,
     dpi=160,
     save_dpi=300,
     figsize=(7, 4.5),
@@ -79,7 +80,7 @@ def boxplot(
     ax.ticklabel_format(style="plain", axis=value_axis)
     ax.tick_params(axis=value_axis, labelsize=11, length=5, width=1.1)
     getattr(ax, f"{value_axis}axis").set_major_formatter(
-        FuncFormatter(lambda v, _: f"{v:,.2f}")
+        FuncFormatter(lambda v, _: f"{v:,.{decimals}f}")
     )
 
     if details:
