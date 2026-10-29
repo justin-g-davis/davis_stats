@@ -12,7 +12,6 @@ setup(
         'numpy>=1.20.0',
         'matplotlib>=3.11.2',
         'scipy>=1.6.0',
-        'seaborn>=0.12.0',
         'statsmodels>=0.14.0',
         'ipympl>=0.8.0',
         'linearmodels>=7.0'],
