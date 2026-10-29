@@ -1,128 +1,162 @@
-import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
+import pandas as pd
+from matplotlib.ticker import FuncFormatter, MaxNLocator
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
-def scatter(df, y, x, fit_line=False, dpi=150, figsize=(6, 4)):
+
+def scatter(
+    df,
+    y,
+    x,
+    fit_line=False,
+    dpi=200,
+    save_dpi=300,
+    figsize=(7, 4.5),
+    save_path=None,
+    facecolor="white",
+):
     """
     Create a 2D or 3D scatter plot with optional fit line.
     """
-    
-    # Convert x to list if string
     if isinstance(x, str):
         x = [x]
-    
-    # Determine plot type based on number of x variables
+
     if len(x) == 1:
-        # 2D scatter plot
-        x_var = x[0]
-        
-        # Calculate correlation coefficient
-        corr = df[x_var].corr(df[y])
-        
-        # Set style
-        sns.set_style("whitegrid")
-        
-        # Create figure
-        fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
-        
-        # Create scatter plot
-        if fit_line:
-            sns.regplot(data=df, 
-                       x=x_var, 
-                       y=y,
-                       scatter_kws={'alpha':0.5},
-                       line_kws={'color': 'red'},
-                       ci=None)
-        else:
-            sns.scatterplot(data=df,
-                           x=x_var,
-                           y=y,
-                           alpha=0.5)
-        
-        # Customize plot
-        plt.title(f'{y} and {x_var}\nCorrelation: {corr:.3f}', pad=15)
-        plt.xlabel(x_var)
-        plt.ylabel(y)
-        
-        # Adjust layout
-        plt.tight_layout()
-        
+        ax = _scatter_2d(
+            df, y, x[0], fit_line=fit_line, dpi=dpi, figsize=figsize,
+            facecolor=facecolor,
+        )
     else:
-        # 3D scatter plot (use first 2 variables from x list)
-        x_var = x[0]
-        z_var = x[1]
-        
-        # Create 3D figure
-        fig = plt.figure(figsize=figsize, dpi=dpi)
-        ax = fig.add_subplot(111, projection='3d')
-        
-        # Remove NaN values for plotting
-        plot_df = df[[x_var, z_var, y]].dropna()
-        
-        # Create 3D scatter plot
-        scatter = ax.scatter(plot_df[x_var], plot_df[z_var], plot_df[y], 
-                            c=plot_df[y], cmap='RdYlBu_r', s=50,
-                            edgecolor='black', linewidth=0.5,
-                            alpha=0.8)
-        
-        # Add colorbar
-        cbar = plt.colorbar(scatter, ax=ax, pad=0.15, shrink=0.8)
-        cbar.set_label(y, rotation=270, labelpad=15)
-        
-        # Add best-fit plane if requested
-        if fit_line:
-            # Prepare data for plane fitting: y = a*x + b*z + c
-            X_data = np.column_stack([plot_df[x_var], plot_df[z_var], np.ones(len(plot_df))])
-            y_data = plot_df[y].values
-            
-            # Fit plane using least squares
-            coeffs, residuals, rank, s = np.linalg.lstsq(X_data, y_data, rcond=None)
-            a, b, c = coeffs
-            
-            # Create mesh grid for the regression plane
-            x_surf = np.linspace(plot_df[x_var].min(), plot_df[x_var].max(), 20)
-            z_surf = np.linspace(plot_df[z_var].min(), plot_df[z_var].max(), 20)
-            X_mesh, Z_mesh = np.meshgrid(x_surf, z_surf)
-            
-            # Calculate y values for the plane
-            Y_mesh = a * X_mesh + b * Z_mesh + c
-            
-            # Plot the regression plane
-            surf = ax.plot_surface(X_mesh, Z_mesh, Y_mesh, 
-                                   alpha=0.4, cmap='coolwarm',
-                                   edgecolor='black', linewidth=0.5,
-                                   rstride=1, cstride=1,
-                                   antialiased=True)
-        
-        # Set title
-        title = f'{y}, {x_var}, and {z_var}'
-        
-        # Set axis labels
-        ax.set_xlabel(x_var, labelpad=10)
-        ax.set_ylabel(z_var, labelpad=10)
-        ax.set_zlabel(y, labelpad=10)
-        
-        # Move z-axis to left side
-        ax.zaxis._axinfo['juggled'] = (1, 2, 0)
-        
-        # Flip axes
-        ax.invert_xaxis()
-        ax.invert_yaxis()
-        
-        # Adjust viewing angle
-        ax.view_init(elev=25, azim=135)
-        
-        # Grid styling
-        ax.xaxis._axinfo["grid"]['color'] = (0.5, 0.5, 0.5, 0.5)
-        ax.yaxis._axinfo["grid"]['color'] = (0.5, 0.5, 0.5, 0.5)
-        ax.zaxis._axinfo["grid"]['color'] = (0.5, 0.5, 0.5, 0.5)
-        
-        # Set title
-        ax.set_title(title, pad=15)
-        
-        # Adjust layout
-        plt.tight_layout()
-    
-    # Show plot
-    plt.show()
+        ax = _scatter_3d(
+            df, y, x[0], x[1], fit_line=fit_line, dpi=dpi, figsize=figsize,
+            facecolor=facecolor,
+        )
+
+    fig = ax.figure
+    fig.tight_layout()
+    if save_path is not None:
+        fig.savefig(
+            save_path, dpi=save_dpi, facecolor=facecolor,
+            bbox_inches="tight", pad_inches=0.15,
+        )
+    plt.show(block=False)
+    return ax
+
+
+def _style_2d(ax):
+    ax.grid(True, linestyle="--", linewidth=0.8, alpha=0.45)
+    ax.set_axisbelow(True)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_linewidth(1.2)
+    ax.spines["bottom"].set_linewidth(1.2)
+    ax.tick_params(labelsize=10, length=5, width=1.1)
+    ax.ticklabel_format(style="plain")
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:,.2f}"))
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:,.2f}"))
+    ax.xaxis.set_major_locator(MaxNLocator(nbins=6))
+    ax.yaxis.set_major_locator(MaxNLocator(nbins=6))
+
+
+def _scatter_2d(df, y, x_var, fit_line, dpi, figsize, facecolor):
+    plot_df = df[[x_var, y]].dropna()
+    if plot_df.empty:
+        raise ValueError("No data to plot after dropping NaNs.")
+
+    xv = plot_df[x_var].to_numpy(dtype=float)
+    yv = plot_df[y].to_numpy(dtype=float)
+    corr = float(pd.Series(xv).corr(pd.Series(yv)))
+
+    fig, ax = plt.subplots(figsize=figsize, dpi=dpi, facecolor=facecolor)
+    fig.patch.set_facecolor(facecolor)
+    ax.set_facecolor(facecolor)
+
+    ax.scatter(
+        xv,
+        yv,
+        s=32,
+        c="#7eb6d9",
+        alpha=0.78,
+        edgecolors="#1f1f1f",
+        linewidths=0.45,
+        zorder=3,
+    )
+
+    if fit_line and len(xv) >= 2:
+        slope, intercept = np.polyfit(xv, yv, 1)
+        x_line = np.array([xv.min(), xv.max()])
+        ax.plot(
+            x_line,
+            slope * x_line + intercept,
+            color="#c0392b",
+            linewidth=1.8,
+            zorder=4,
+        )
+
+    _style_2d(ax)
+    ax.set_title(f"{y} and {x_var}\nCorrelation: {corr:.3f}", fontsize=13, pad=10)
+    ax.set_xlabel(x_var, fontsize=11)
+    ax.set_ylabel(y, fontsize=11)
+    return ax
+
+
+def _scatter_3d(df, y, x_var, z_var, fit_line, dpi, figsize, facecolor):
+    plot_df = df[[x_var, z_var, y]].dropna()
+    if plot_df.empty:
+        raise ValueError("No data to plot after dropping NaNs.")
+
+    fig = plt.figure(figsize=figsize, dpi=dpi, facecolor=facecolor)
+    fig.patch.set_facecolor(facecolor)
+    ax = fig.add_subplot(111, projection="3d", facecolor=facecolor)
+
+    ax.scatter(
+        plot_df[x_var],
+        plot_df[z_var],
+        plot_df[y],
+        s=32,
+        c="#7eb6d9",
+        alpha=0.78,
+        edgecolors="#1f1f1f",
+        linewidths=0.45,
+        depthshade=True,
+    )
+
+    if fit_line:
+        X_data = np.column_stack(
+            [plot_df[x_var], plot_df[z_var], np.ones(len(plot_df))]
+        )
+        y_data = plot_df[y].to_numpy(dtype=float)
+        coeffs, *_ = np.linalg.lstsq(X_data, y_data, rcond=None)
+        a, b, c = coeffs
+
+        x_surf = np.linspace(plot_df[x_var].min(), plot_df[x_var].max(), 12)
+        z_surf = np.linspace(plot_df[z_var].min(), plot_df[z_var].max(), 12)
+        X_mesh, Z_mesh = np.meshgrid(x_surf, z_surf)
+        Y_mesh = a * X_mesh + b * Z_mesh + c
+        ax.plot_surface(
+            X_mesh,
+            Z_mesh,
+            Y_mesh,
+            color="#c0392b",
+            alpha=0.28,
+            edgecolor="none",
+            shade=False,
+        )
+
+    ax.set_title(f"{y}, {x_var}, and {z_var}", fontsize=13, pad=10)
+    ax.set_xlabel(x_var, fontsize=11, labelpad=8)
+    ax.set_ylabel(z_var, fontsize=11, labelpad=8)
+    ax.set_zlabel(y, fontsize=11, labelpad=8)
+    ax.tick_params(labelsize=9, length=4, width=1.0)
+
+    ax.zaxis._axinfo["juggled"] = (1, 2, 0)
+    ax.invert_xaxis()
+    ax.invert_yaxis()
+    ax.view_init(elev=25, azim=135)
+
+    grid = (0.55, 0.55, 0.55, 0.35)
+    ax.xaxis._axinfo["grid"]["color"] = grid
+    ax.yaxis._axinfo["grid"]["color"] = grid
+    ax.zaxis._axinfo["grid"]["color"] = grid
+    return ax
