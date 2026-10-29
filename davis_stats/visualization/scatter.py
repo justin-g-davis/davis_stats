@@ -10,6 +10,7 @@ def scatter(
     y,
     x,
     fit_line=False,
+    decimals=1,
     dpi=200,
     save_dpi=300,
     figsize=(7, 4.5),
@@ -18,19 +19,24 @@ def scatter(
 ):
     """
     Create a 2D or 3D scatter plot with optional fit line.
+
+    fit_line:
+        False        — points only
+        "linear"     — OLS of y on x  (or a plane in 3D)
+        "quadratic"  — OLS of y on x and x²  (2D only)
     """
     if isinstance(x, str):
         x = [x]
 
     if len(x) == 1:
         ax = _scatter_2d(
-            df, y, x[0], fit_line=fit_line, dpi=dpi, figsize=figsize,
-            facecolor=facecolor,
+            df, y, x[0], fit_line=fit_line, decimals=decimals,
+            dpi=dpi, figsize=figsize, facecolor=facecolor,
         )
     else:
         ax = _scatter_3d(
-            df, y, x[0], x[1], fit_line=fit_line, dpi=dpi, figsize=figsize,
-            facecolor=facecolor,
+            df, y, x[0], x[1], fit_line=fit_line, decimals=decimals,
+            dpi=dpi, figsize=figsize, facecolor=facecolor,
         )
 
     fig = ax.figure
@@ -44,7 +50,18 @@ def scatter(
     return ax
 
 
-def _style_2d(ax):
+def _fit_kind(fit_line):
+    if not fit_line:
+        return None
+    if fit_line == "linear":
+        return "linear"
+    if fit_line == "quadratic":
+        return "quadratic"
+    raise ValueError("fit_line must be False, 'linear', or 'quadratic'")
+
+
+def _style_2d(ax, decimals):
+    fmt = FuncFormatter(lambda v, _: f"{v:,.{decimals}f}")
     ax.grid(True, linestyle="--", linewidth=0.8, alpha=0.45)
     ax.set_axisbelow(True)
     ax.spines["top"].set_visible(False)
@@ -53,13 +70,13 @@ def _style_2d(ax):
     ax.spines["bottom"].set_linewidth(1.2)
     ax.tick_params(labelsize=10, length=5, width=1.1)
     ax.ticklabel_format(style="plain")
-    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:,.2f}"))
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:,.2f}"))
+    ax.xaxis.set_major_formatter(fmt)
+    ax.yaxis.set_major_formatter(fmt)
     ax.xaxis.set_major_locator(MaxNLocator(nbins=6))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=6))
 
 
-def _scatter_2d(df, y, x_var, fit_line, dpi, figsize, facecolor):
+def _scatter_2d(df, y, x_var, fit_line, decimals, dpi, figsize, facecolor):
     plot_df = df[[x_var, y]].dropna()
     if plot_df.empty:
         raise ValueError("No data to plot after dropping NaNs.")
@@ -83,25 +100,35 @@ def _scatter_2d(df, y, x_var, fit_line, dpi, figsize, facecolor):
         zorder=3,
     )
 
-    if fit_line and len(xv) >= 2:
-        slope, intercept = np.polyfit(xv, yv, 1)
-        x_line = np.array([xv.min(), xv.max()])
+    kind = _fit_kind(fit_line)
+    if kind is not None and len(xv) >= (3 if kind == "quadratic" else 2):
+        degree = 2 if kind == "quadratic" else 1
+        coefs = np.polyfit(xv, yv, degree)
+        x_line = np.linspace(xv.min(), xv.max(), 200)
+        y_line = np.polyval(coefs, x_line)
         ax.plot(
             x_line,
-            slope * x_line + intercept,
+            y_line,
             color="#c0392b",
             linewidth=1.8,
             zorder=4,
         )
 
-    _style_2d(ax)
-    ax.set_title(f"{y} and {x_var}\nCorrelation: {corr:.3f}", fontsize=13, pad=10)
+    _style_2d(ax, decimals)
+    ax.set_title(
+        f"{y} and {x_var}\nCorrelation: {corr:.2f}",
+        fontsize=13, pad=10,
+    )
     ax.set_xlabel(x_var, fontsize=11)
     ax.set_ylabel(y, fontsize=11)
     return ax
 
 
-def _scatter_3d(df, y, x_var, z_var, fit_line, dpi, figsize, facecolor):
+def _scatter_3d(df, y, x_var, z_var, fit_line, decimals, dpi, figsize, facecolor):
+    kind = _fit_kind(fit_line)
+    if kind == "quadratic":
+        raise ValueError("fit_line='quadratic' is only available for 2D scatter plots.")
+
     plot_df = df[[x_var, z_var, y]].dropna()
     if plot_df.empty:
         raise ValueError("No data to plot after dropping NaNs.")
@@ -122,7 +149,7 @@ def _scatter_3d(df, y, x_var, z_var, fit_line, dpi, figsize, facecolor):
         depthshade=True,
     )
 
-    if fit_line:
+    if kind == "linear":
         X_data = np.column_stack(
             [plot_df[x_var], plot_df[z_var], np.ones(len(plot_df))]
         )
@@ -143,6 +170,11 @@ def _scatter_3d(df, y, x_var, z_var, fit_line, dpi, figsize, facecolor):
             edgecolor="none",
             shade=False,
         )
+
+    fmt = FuncFormatter(lambda v, _: f"{v:,.{decimals}f}")
+    ax.xaxis.set_major_formatter(fmt)
+    ax.yaxis.set_major_formatter(fmt)
+    ax.zaxis.set_major_formatter(fmt)
 
     ax.set_title(f"{y}, {x_var}, and {z_var}", fontsize=13, pad=10)
     ax.set_xlabel(x_var, fontsize=11, labelpad=8)
