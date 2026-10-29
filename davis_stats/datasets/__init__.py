@@ -19,6 +19,8 @@ class DataFrames:
     _sp1500_panel = None
     _student_athletes = None
     _m = None
+    _sweet_things = None
+    _sweet_things_simple = None
 
     @property
     def ceo_comp(self):
@@ -104,6 +106,18 @@ class DataFrames:
             self._m = pd.read_excel(DATA_DIR / 'm.xlsx')
         return self._m
 
+    @property
+    def sweet_things(self):
+        if self._sweet_things is None:
+            self._sweet_things = pd.read_excel(DATA_DIR / 'sweet_things.xlsx')
+        return self._sweet_things
+
+    @property
+    def sweet_things_simple(self):
+        if self._sweet_things_simple is None:
+            self._sweet_things_simple = pd.read_excel(DATA_DIR / 'sweet_things_simple.xlsx')
+        return self._sweet_things_simple
+
 _datasets = DataFrames()
 
 
@@ -148,3 +162,9 @@ def student_athletes():
 
 def m():
     return _datasets.m
+
+def sweet_things():
+    return _datasets.sweet_things
+
+def sweet_things_simple():
+    return _datasets.sweet_things_simple
