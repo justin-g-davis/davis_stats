@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='davis_stats',
-    version='2.2.3',
+    version='2.2.4',
     packages=find_packages(),
     package_data={
         'davis_stats': ['datasets/*.xlsx']},
