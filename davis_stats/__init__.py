@@ -5,7 +5,7 @@ from .visualization.scatter import scatter
 from .visualization.residuals import residuals
 
 from .reg_modeling.reg import reg
-from .reg_modeling.marginal_effects import marginal_effects
+from .reg_modeling.mfx import mfx
 
 from .reg_tests.bp_test import bp_test
 from .reg_tests.sw_test import sw_test
